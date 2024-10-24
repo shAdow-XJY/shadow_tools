@@ -1,17 +1,16 @@
 class STConfig
 {
-  static List<String> componentList = ["File", "Covert", "Other"];
-
-  static List<String> fileList = [
-    "Image Resize",
-    "Image Format"
-  ];
-
-  static List<String> convertList = [
-    "Encode/Decode"
-  ];
-
-  static List<String> otherList = [
-    "Color Picker"
-  ];
+  static Map<String, List<String>> componentList = {
+    "File" : [
+      "Image Resize",
+      "Image Format"
+    ],
+    "Convert" : [
+      "Encode/Decode"
+    ],
+    "Other" : [
+      "Color Picker"
+    ],
+  };
+  
 }

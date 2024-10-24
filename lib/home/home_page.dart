@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shadow_tools/config/st_config_global.dart';
+import 'package:shadow_tools/pages/page_entry.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
 
@@ -17,6 +19,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isHoveredOverList = false; // 用于检测鼠标是否在浮窗上
   bool _isHoveredOverItem = false;
   final ScrollController _scrollController = ScrollController(); // 用于监听滚动事件
+  String selectedText = "Please select an option";
 
   @override
   void dispose() {
@@ -25,12 +28,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // 显示浮窗
-  void _showFloatingList(BuildContext context, GlobalKey key) {
+  void _showFloatingList(BuildContext context, GlobalKey key, String component) {
     _hideFloatingList(); // 显示新的浮窗前移除旧的
 
     final RenderBox renderBox = key.currentContext?.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
     const alertWidth = 200.0;
+    List<String> componentList = STConfigGlobal.getListWithComponent(component);
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
@@ -57,12 +61,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
                 ),
                 child: ListView.builder(
-                  itemCount: 10,
+                  itemCount: componentList.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      title: Text('Item ${index + 1}'),
+                      title: Text(componentList[index]),
                       onTap: () {
-                        print('Clicked on Item ${index + 1}');
+                        setState(() {
+                          selectedText = componentList[index]; // 更新选中的文字
+                        });
                       },
                     );
                   },
@@ -87,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return MouseRegion(
       onEnter: (event) {
         _isHoveredOverItem = true;
-        _showFloatingList(context, key); // 显示浮窗
+        _showFloatingList(context, key, title); // 显示浮窗
       },
       onExit: (event) {
         _isHoveredOverItem = false;
@@ -100,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          print('Clicked on $title');
+          _showFloatingList(context, key, title); // 显示浮窗
         },
         child: SizedBox(  // 用 Container 包裹，指定高度为导航栏的高度
           height: AppBar().preferredSize.height, // 设置 hover 区域的高度为导航栏高度
@@ -113,6 +119,41 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // 构建上方按钮容器
+  Widget _buildButtonContainer() {
+    List<String> buttons = STConfigGlobal.getAllItems();
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Wrap(
+        spacing: 10, // 按钮之间的间距
+        runSpacing: 10, // 行之间的间距
+        children: buttons.map((buttonText) {
+          return ElevatedButton(
+            onPressed: () {
+              setState(() {
+                selectedText = buttonText; // 更新选中的文字
+              });
+            },
+            child: Text(buttonText),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // 构建动态显示区域
+  Widget _buildTextDisplay(String text) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      color: Colors.grey.shade200,
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 18),
       ),
     );
   }
@@ -171,11 +212,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildNavItem('File', _navKey1),
+                          _buildNavItem(STConfigGlobal.fileComponent, _navKey1),
                           const SizedBox(width: 20),
-                          _buildNavItem('Convert', _navKey2),
+                          _buildNavItem(STConfigGlobal.convertComponent, _navKey2),
                           const SizedBox(width: 20),
-                          _buildNavItem('Other', _navKey3),
+                          _buildNavItem(STConfigGlobal.otherComponent, _navKey3),
                         ],
                       ),
                       // 右边图标
@@ -191,14 +232,19 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
 
+            // 按钮容器的内容
+            SliverToBoxAdapter(
+              child: _buildButtonContainer(),
+            ),
+
+            // 动态文字显示内容
+            SliverToBoxAdapter(
+              child: _buildTextDisplay(selectedText),
+            ),
+
             // 主体内容
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                    (context, index) => ListTile(
-                  title: Text('Item $index'),
-                ),
-                childCount: 50,
-              ),
+            SliverToBoxAdapter(
+              child: STPageEntry.getWidgetWithType(selectedText),
             ),
           ],
         ),
