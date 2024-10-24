@@ -30,13 +30,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final RenderBox renderBox = key.currentContext?.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
+    const alertWidth = 200.0;
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
         return Positioned(
           left: position.dx,
           top: AppBar().preferredSize.height, // 使用动态获取的 SliverAppBar 高度
-          width: renderBox.size.width,
+          width: alertWidth,
           child: MouseRegion(
             onEnter: (_) {
               _isHoveredOverList = true;
@@ -48,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Material(
               elevation: 4.0,
               child: Container(
-                width: renderBox.size.width,
+                width: alertWidth,
                 height: 150, // 控制浮窗的高度
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -101,10 +102,11 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: () {
           print('Clicked on $title');
         },
-        child: Container(  // 用 Container 包裹，指定高度为导航栏的高度
+        child: SizedBox(  // 用 Container 包裹，指定高度为导航栏的高度
           height: AppBar().preferredSize.height, // 设置 hover 区域的高度为导航栏高度
           child: Row(
             key: key,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title),
               const Icon(Icons.arrow_drop_down), // 下拉箭头图标
@@ -169,11 +171,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildNavItem('Component 1', _navKey1),
+                          _buildNavItem('File', _navKey1),
                           const SizedBox(width: 20),
-                          _buildNavItem('Component 2', _navKey2),
+                          _buildNavItem('Convert', _navKey2),
                           const SizedBox(width: 20),
-                          _buildNavItem('Component 3', _navKey3),
+                          _buildNavItem('Other', _navKey3),
                         ],
                       ),
                       // 右边图标
