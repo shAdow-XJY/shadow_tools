@@ -19,19 +19,33 @@ class _STFileImageResizeState extends State<STFileImageResize> {
 
   // 选择图片
   Future<void> _pickImage() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+    print("Picking image...");
 
-    if (result != null && result.files.single.bytes != null) {
-      setState(() {
-        _originalImage = result.files.single.bytes;
-      });
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+
+      if (result == null) {
+        print("No file selected");
+        return;
+      }
+
+      if (result.files.single.bytes != null) {
+        setState(() {
+          _originalImage = result.files.single.bytes;
+          print("Image selected: ${result.files.single.name}");
+        });
+      } else {
+        print("Selected file does not contain bytes");
+      }
+    } catch (e) {
+      print("Error picking image: $e");
     }
   }
 
   // 调整图片大小
   Future<void> _resizeImage() async {
     if (_originalImage == null) {
-      print("No image selected");
+      print("No image selected for resizing");
       return;
     }
 
@@ -51,26 +65,38 @@ class _STFileImageResizeState extends State<STFileImageResize> {
         quality: 100,
       );
 
+      if (result == null) {
+        print("Compression returned null");
+        return;
+      }
+
       setState(() {
-        print("success compressing image: $_originalImage");
         _resizedImage = result;
+        print("Image resized successfully");
       });
     } catch (e) {
       print("Error compressing image: $e");
     }
   }
 
-
   // 保存图片到本地
   void _saveResizedImage() {
-    if (_resizedImage == null) return;
+    if (_resizedImage == null) {
+      print("No resized image to save");
+      return;
+    }
 
-    final blob = html.Blob([_resizedImage!]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor = html.AnchorElement(href: url)
-      ..setAttribute("download", "resized_image.png")
-      ..click();
-    html.Url.revokeObjectUrl(url);
+    try {
+      final blob = html.Blob([_resizedImage!]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute("download", "resized_image.png")
+        ..click();
+      html.Url.revokeObjectUrl(url);
+      print("Resized image saved successfully");
+    } catch (e) {
+      print("Error saving resized image: $e");
+    }
   }
 
   @override
