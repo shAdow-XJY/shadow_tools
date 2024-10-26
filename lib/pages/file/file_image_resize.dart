@@ -1,7 +1,6 @@
 import 'dart:html' as html;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class STFileImageResize extends StatefulWidget {
@@ -17,32 +16,28 @@ class _STFileImageResizeState extends State<STFileImageResize> {
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
 
-  // 选择图片
-  Future<void> _pickImage() async {
-    print("Picking image...");
+  // 使用 HTML <input> 选择图片
+  void _pickImage() {
+    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+    uploadInput.accept = 'image/*';
+    uploadInput.click();
 
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+    uploadInput.onChange.listen((e) {
+      final file = uploadInput.files?.first;
+      if (file != null) {
+        final reader = html.FileReader();
+        reader.readAsArrayBuffer(file);
 
-      if (result == null) {
-        print("No file selected");
-        return;
-      }
-
-      if (result.files.single.bytes != null) {
-        setState(() {
-          _originalImage = result.files.single.bytes;
-          print("Image selected: ${result.files.single.name}");
+        reader.onLoadEnd.listen((e) {
+          setState(() {
+            _originalImage = reader.result as Uint8List;
+            print("Image selected: ${file.name}");
+          });
         });
-      } else {
-        print("Selected file does not contain bytes");
       }
-    } catch (e) {
-      print("Error picking image: $e");
-    }
+    });
   }
 
-  // 调整图片大小
   Future<void> _resizeImage() async {
     if (_originalImage == null) {
       print("No image selected for resizing");
@@ -62,6 +57,7 @@ class _STFileImageResizeState extends State<STFileImageResize> {
         _originalImage!,
         minWidth: targetWidth,
         minHeight: targetHeight,
+        format: CompressFormat.png,  // 确保使用 PNG 格式
         quality: 100,
       );
 
@@ -72,7 +68,7 @@ class _STFileImageResizeState extends State<STFileImageResize> {
 
       setState(() {
         _resizedImage = result;
-        print("Image resized successfully");
+        print("Image resized successfully with transparency");
       });
     } catch (e) {
       print("Error compressing image: $e");
