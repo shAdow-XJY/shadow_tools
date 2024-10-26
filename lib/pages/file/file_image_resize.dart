@@ -1,7 +1,6 @@
 import 'dart:html' as html;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui; // 引入该包以便使用 web 图像处理功能
 
 class STFileImageResize extends StatefulWidget {
   const STFileImageResize({super.key});
@@ -13,6 +12,7 @@ class STFileImageResize extends StatefulWidget {
 class _STFileImageResizeState extends State<STFileImageResize> {
   Uint8List? _originalImage; // 原始图片的字节数据
   Uint8List? _resizedImage;  // 调整后的图片字节数据
+  String _originalFormat = 'png'; // 原始格式
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
 
@@ -31,6 +31,7 @@ class _STFileImageResizeState extends State<STFileImageResize> {
         reader.onLoadEnd.listen((e) {
           setState(() {
             _originalImage = reader.result as Uint8List;
+            _originalFormat = file.name.split('.').last; // 获取原始文件格式
             print("Image selected: ${file.name}");
           });
         });
@@ -66,8 +67,8 @@ class _STFileImageResizeState extends State<STFileImageResize> {
       // 将原始图像绘制到 Canvas 上并调整大小
       context.drawImageScaled(originalImage, 0, 0, targetWidth, targetHeight);
 
-      // 将 Canvas 的内容转换为 PNG 图像数据
-      final resizedBlob = await canvas.toBlob('image/png');
+      // 将 Canvas 的内容转换为原始格式的图像数据
+      final resizedBlob = await canvas.toBlob('image/$_originalFormat');
       final reader = html.FileReader();
       reader.readAsArrayBuffer(resizedBlob!);
 
@@ -93,7 +94,7 @@ class _STFileImageResizeState extends State<STFileImageResize> {
       final blob = html.Blob([_resizedImage!]);
       final url = html.Url.createObjectUrlFromBlob(blob);
       final anchor = html.AnchorElement(href: url)
-        ..setAttribute("download", "resized_image.png")
+        ..setAttribute("download", "resized_image.${_originalFormat}") // 使用原始格式作为扩展名
         ..click();
       html.Url.revokeObjectUrl(url);
       print("Resized image saved successfully");
