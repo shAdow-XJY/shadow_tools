@@ -1,7 +1,7 @@
 import 'dart:html' as html;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'dart:ui' as ui; // 引入该包以便使用 web 图像处理功能
 
 class STFileImageResize extends StatefulWidget {
   const STFileImageResize({super.key});
@@ -53,25 +53,32 @@ class _STFileImageResizeState extends State<STFileImageResize> {
     }
 
     try {
-      final Uint8List? result = await FlutterImageCompress.compressWithList(
-        _originalImage!,
-        minWidth: targetWidth,
-        minHeight: targetHeight,
-        format: CompressFormat.png,  // 确保使用 PNG 格式
-        quality: 100,
-      );
+      // 创建一个 Canvas 元素用于图像绘制
+      final canvas = html.CanvasElement(width: targetWidth, height: targetHeight);
+      final context = canvas.context2D;
 
-      if (result == null) {
-        print("Compression returned null");
-        return;
-      }
+      // 加载原始图像
+      final originalImage = html.ImageElement();
+      originalImage.src = html.Url.createObjectUrl(html.Blob([_originalImage!]));
+
+      await originalImage.onLoad.first;
+
+      // 将原始图像绘制到 Canvas 上并调整大小
+      context.drawImageScaled(originalImage, 0, 0, targetWidth, targetHeight);
+
+      // 将 Canvas 的内容转换为 PNG 图像数据
+      final resizedBlob = await canvas.toBlob('image/png');
+      final reader = html.FileReader();
+      reader.readAsArrayBuffer(resizedBlob!);
+
+      await reader.onLoad.first;
 
       setState(() {
-        _resizedImage = result;
-        print("Image resized successfully with transparency");
+        _resizedImage = reader.result as Uint8List?;
+        print("Image resized successfully with transparency using Canvas");
       });
     } catch (e) {
-      print("Error compressing image: $e");
+      print("Error resizing image using Canvas: $e");
     }
   }
 
