@@ -11,6 +11,7 @@ class STConfigGlobal {
   ];
   static List<String> otherList = [
     'Color Picker',
+    'CSS Preview',
   ];
 
   static List<String> getListWithComponent(String component) {
@@ -38,4 +39,5 @@ class STConfigGlobal {
   static const String fileImageFormat = "Image Format";
   static const String convertEncodeDecode = "Encode/Decode";
   static const String otherColorPicker = "Color Picker";
+  static const String otherCSSPreview = "CSS Preview";
 }

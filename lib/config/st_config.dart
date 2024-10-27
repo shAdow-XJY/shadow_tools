@@ -9,7 +9,8 @@ class STConfig
       "Encode/Decode"
     ],
     "Other" : [
-      "Color Picker"
+      "Color Picker",
+      "CSS Preview"
     ],
   };
   

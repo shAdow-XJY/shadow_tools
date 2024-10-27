@@ -89,7 +89,7 @@ class _STFileImageFormatState extends State<STFileImageFormat> {
         final mimeType = 'image/$_selectedFormat';
         final blob = await canvas.toBlob(mimeType);
         final reader = html.FileReader();
-        reader.readAsArrayBuffer(blob!);
+        reader.readAsArrayBuffer(blob);
 
         await reader.onLoad.first;
 
@@ -121,7 +121,7 @@ class _STFileImageFormatState extends State<STFileImageFormat> {
     // Convert canvas to PNG
     final blob = await canvas.toBlob('image/png');
     final reader = html.FileReader();
-    reader.readAsArrayBuffer(blob!);
+    reader.readAsArrayBuffer(blob);
     await reader.onLoad.first;
 
     return reader.result as Uint8List;

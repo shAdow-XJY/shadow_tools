@@ -70,7 +70,7 @@ class _STFileImageResizeState extends State<STFileImageResize> {
       // 将 Canvas 的内容转换为原始格式的图像数据
       final resizedBlob = await canvas.toBlob('image/$_originalFormat');
       final reader = html.FileReader();
-      reader.readAsArrayBuffer(resizedBlob!);
+      reader.readAsArrayBuffer(resizedBlob);
 
       await reader.onLoad.first;
 
@@ -94,7 +94,7 @@ class _STFileImageResizeState extends State<STFileImageResize> {
       final blob = html.Blob([_resizedImage!]);
       final url = html.Url.createObjectUrlFromBlob(blob);
       final anchor = html.AnchorElement(href: url)
-        ..setAttribute("download", "resized_image.${_originalFormat}") // 使用原始格式作为扩展名
+        ..setAttribute("download", "resized_image.$_originalFormat") // 使用原始格式作为扩展名
         ..click();
       html.Url.revokeObjectUrl(url);
       print("Resized image saved successfully");

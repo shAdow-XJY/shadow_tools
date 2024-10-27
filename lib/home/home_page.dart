@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shadow_tools/config/st_config_global.dart';
-import 'package:shadow_tools/pages/page_entry.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:html' as html;
+
+import '../pages/page_entry.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -80,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
 
-    Overlay.of(context)?.insert(_overlayEntry!);
+    Overlay.of(context).insert(_overlayEntry!);
   }
   // 隐藏浮窗
   void _hideFloatingList() {
